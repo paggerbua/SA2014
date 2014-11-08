@@ -5,8 +5,9 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Hello World!");
-        StopsGUI stopsgui = new StopsGUI();
         DatabaseManager database = DatabaseManager.getInstance();
+        StopsGUI stopsgui = new StopsGUI(database);
+
         database.disconnect();
     }
 }

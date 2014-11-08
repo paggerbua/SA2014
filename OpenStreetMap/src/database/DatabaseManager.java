@@ -47,4 +47,18 @@ public class DatabaseManager {
             System.out.println("SQL Exception: " + ex.getMessage());
         }
     }
+
+    public ResultSet getStops()
+    {
+        ResultSet rs = null;
+        try {
+        String stops_query = "SELECT * FROM stops";
+        preStatement = conn.prepareStatement(stops_query);
+            rs = preStatement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
+
+        return rs;
+    }
 }
