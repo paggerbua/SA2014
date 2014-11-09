@@ -16,6 +16,8 @@ public class StopsGUI extends JFrame{
     JPanel rootPanel;
     private JTable taStops;
     private JTextField tfFilter;
+    private JTextField tfLat;
+    private JTextField tfLon;
     private DatabaseManager database;
     private TableRowSorter<TableModel> sorter;
 
@@ -27,20 +29,8 @@ public class StopsGUI extends JFrame{
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
-
+        addActionListeners();
         //fillTable();
-
-        btFilter.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String text = tfFilter.getText();
-                if (text.length() == 0) {
-                    sorter.setRowFilter(null);
-                } else {
-                    sorter.setRowFilter(RowFilter.regexFilter(text));
-                }
-            }
-        });
     }
 
     private void fillTable() {
@@ -83,5 +73,42 @@ public class StopsGUI extends JFrame{
 
     private void createUIComponents() {
         fillTable();
+    }
+
+    private void addActionListeners() {
+        btFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String text = tfFilter.getText();
+                float lat = 0;
+                float lon = 0;
+                try {
+                    lat = Float.parseFloat(tfLat.getText());
+                }
+                catch(NumberFormatException ex)
+                {
+                    System.out.println("Textfeld lat enthält keine Zahl!");
+                }
+                try {
+                    lon =  Float.parseFloat(tfLon.getText());
+                }
+                catch(NumberFormatException ex)
+                {
+                    System.out.println("Textfeld lon enthält keine Zahl!");
+                }
+
+                if (text.length() == 0 && lat == 0 && lon == 0) {
+                    sorter.setRowFilter(null);
+                } else {
+                    List<RowFilter<Object,Object>> filters = new ArrayList<RowFilter<Object,Object>>(3);
+                    filters.add(RowFilter.regexFilter(text, 3));
+                    filters.add(RowFilter.regexFilter(tfLon.getText(), 1));
+                    filters.add(RowFilter.regexFilter(tfLat.getText(), 2));
+                    RowFilter<Object, Object> rf = RowFilter.andFilter(filters);
+                    sorter.setRowFilter(rf);
+
+                }
+            }
+        });
     }
 }
