@@ -18,8 +18,14 @@ public class StopsGUI extends JFrame{
     private JTextField tfFilter;
     private JTextField tfLat;
     private JTextField tfLon;
+    private JTabbedPane tabbedPane1;
+    private JTextField tfLine;
+    private JButton btFilterLine;
+    private JTable taLines;
+    private JComboBox cbLines;
     private DatabaseManager database;
     private TableRowSorter<TableModel> sorter;
+    private TableRowSorter<TableModel> linesSorter;
 
     public StopsGUI(DatabaseManager dbm)
     {
@@ -40,7 +46,10 @@ public class StopsGUI extends JFrame{
             taStops.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             sorter = new TableRowSorter<TableModel>(taStops.getModel());
             taStops.setRowSorter(sorter);
-            taStops.getColumnModel().getColumn(3).setPreferredWidth(225);
+            taStops.getColumnModel().getColumn(0).setPreferredWidth(120);
+            taStops.getColumnModel().getColumn(1).setPreferredWidth(120);
+            taStops.getColumnModel().getColumn(2).setPreferredWidth(120);
+            taStops.getColumnModel().getColumn(3).setPreferredWidth(500);
         } catch (SQLException e) {
             System.out.println("SQL Exception: " + e.getMessage());
         }
@@ -73,6 +82,34 @@ public class StopsGUI extends JFrame{
 
     private void createUIComponents() {
         fillTable();
+        fillLineTable();
+        fillLineCombo();
+    }
+
+    private void fillLineCombo() {
+        cbLines = new JComboBox();
+        try {
+            ResultSet rs = database.getLines();
+            while(rs.next()){
+                cbLines.addItem(rs.getObject(1));
+            }
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
+    }
+
+    private void fillLineTable() {
+        // It creates and displays the table
+        try {
+            taLines = new JTable(buildTableModel(database.getMergedStopsLines()));
+            taLines.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            linesSorter = new TableRowSorter<TableModel>(taLines.getModel());
+            taLines.setRowSorter(linesSorter);
+            taLines.getColumnModel().getColumn(0).setPreferredWidth(350);
+            taLines.getColumnModel().getColumn(1).setPreferredWidth(350);
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
     }
 
     private void addActionListeners() {

@@ -61,4 +61,33 @@ public class DatabaseManager {
 
         return rs;
     }
+
+    public ResultSet getMergedStopsLines()
+    {
+        ResultSet rs = null;
+        try {
+            String stops_query = "SELECT r.name, s.Name, s.Lat, s.Lon " +
+                    "FROM route_stop_mapping map INNER JOIN routes r ON (map.route_id = r.id)" +
+                    "INNER JOIN stops s ON (map.stop_id = s.ID) LIMIT 10";
+            preStatement = conn.prepareStatement(stops_query);
+            rs = preStatement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
+
+        return rs;
+    }
+
+    public ResultSet getLines() {
+        ResultSet rs = null;
+        try {
+            String stops_query = "SELECT DISTINCT name FROM routes";
+            preStatement = conn.prepareStatement(stops_query);
+            rs = preStatement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
+
+        return rs;
+    }
 }
