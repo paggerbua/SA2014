@@ -19,7 +19,7 @@ public class StopsGUI extends JFrame{
     private JTextField tfLat;
     private JTextField tfLon;
     private JTabbedPane tabbedPane1;
-    private JTextField tfLine;
+    private JTextField tfLineFilter;
     private JButton btFilterLine;
     private JTable taLines;
     private JComboBox cbLines;
@@ -35,9 +35,10 @@ public class StopsGUI extends JFrame{
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
-        addActionListeners();
-        //fillTable();
+        addFilterAllButtonActionListener();
+        addFilterRouteButtonActionListener();
     }
+
 
     private void fillTable() {
         // It creates and displays the table
@@ -82,20 +83,36 @@ public class StopsGUI extends JFrame{
 
     private void createUIComponents() {
         fillTable();
-        fillLineTable();
         fillLineCombo();
+        addComboBoxListener();
+        fillLineTable();
     }
 
     private void fillLineCombo() {
-        cbLines = new JComboBox();
+        DefaultComboBoxModel cbmodel = new DefaultComboBoxModel();
         try {
             ResultSet rs = database.getLines();
+
             while(rs.next()){
-                cbLines.addItem(rs.getObject(1));
+                cbmodel.addElement(rs.getObject(1));
             }
         } catch (SQLException e) {
             System.out.println("SQL Exception: " + e.getMessage());
         }
+        cbLines = new JComboBox(cbmodel);
+    }
+    private void fillLineCombo(String filter_text){
+        DefaultComboBoxModel cbmodel = new DefaultComboBoxModel();
+        try {
+            ResultSet rs = database.getLines(filter_text);
+
+            while(rs.next()){
+                cbmodel.addElement(rs.getObject(1));
+            }
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
+        cbLines.setModel(cbmodel);
     }
 
     private void fillLineTable() {
@@ -112,7 +129,7 @@ public class StopsGUI extends JFrame{
         }
     }
 
-    private void addActionListeners() {
+    private void addFilterAllButtonActionListener() {
         btFilter.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,6 +161,46 @@ public class StopsGUI extends JFrame{
                     RowFilter<Object, Object> rf = RowFilter.andFilter(filters);
                     sorter.setRowFilter(rf);
 
+                }
+            }
+        });
+    }
+
+    private void addFilterRouteButtonActionListener()
+    {
+        btFilterLine.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            String filter_text = tfLineFilter.getText();
+            if (filter_text.length() == 0) {
+                fillLineCombo();
+            } else {
+                fillLineCombo(filter_text);
+            }
+        }});
+    }
+
+    private void addComboBoxListener() {
+        //final String where_text = String.valueOf(cbLines.getSelectedItem());
+
+        cbLines.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JComboBox cb = (JComboBox)e.getSource();
+                String where_text = (String)cb.getSelectedItem();
+                try {
+                    if(where_text == ""){
+                        taLines.setModel(buildTableModel(database.getMergedStopsLines()));
+                    }
+                    else {
+                        taLines.setModel(buildTableModel(database.getMergedStopsLines(where_text)));
+                    }
+                    taLines.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                    linesSorter = new TableRowSorter<TableModel>(taLines.getModel());
+                    taLines.setRowSorter(linesSorter);
+                    taLines.getColumnModel().getColumn(0).setPreferredWidth(350);
+                    taLines.getColumnModel().getColumn(1).setPreferredWidth(350);
+                } catch (SQLException ex) {
+                    System.out.println("SQL Exception: " + ex.getMessage());
                 }
             }
         });

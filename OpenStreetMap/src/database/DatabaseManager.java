@@ -66,7 +66,7 @@ public class DatabaseManager {
     {
         ResultSet rs = null;
         try {
-            String stops_query = "SELECT r.name, s.Name, s.Lat, s.Lon " +
+            String stops_query = "SELECT DISTINCT r.name, s.Name, s.Lat, s.Lon " +
                     "FROM route_stop_mapping map INNER JOIN routes r ON (map.route_id = r.id)" +
                     "INNER JOIN stops s ON (map.stop_id = s.ID) LIMIT 10";
             preStatement = conn.prepareStatement(stops_query);
@@ -78,10 +78,38 @@ public class DatabaseManager {
         return rs;
     }
 
+    public ResultSet getMergedStopsLines(String where_text)
+    {
+        ResultSet rs = null;
+        try {
+            String stops_query = "SELECT r.name, s.Name, s.Lat, s.Lon " +
+                    "FROM route_stop_mapping map INNER JOIN routes r ON (map.route_id = r.id)" +
+                    "INNER JOIN stops s ON (map.stop_id = s.ID) WHERE r.name = '" + where_text + "'";
+            preStatement = conn.prepareStatement(stops_query);
+            rs = preStatement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
+
+        return rs;
+    }
     public ResultSet getLines() {
         ResultSet rs = null;
         try {
             String stops_query = "SELECT DISTINCT name FROM routes";
+            preStatement = conn.prepareStatement(stops_query);
+            rs = preStatement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("SQL Exception: " + e.getMessage());
+        }
+
+        return rs;
+    }
+
+    public ResultSet getLines(String filter_text) {
+        ResultSet rs = null;
+        try {
+            String stops_query = "SELECT DISTINCT name FROM routes WHERE name LIKE '%" + filter_text + "%'";
             preStatement = conn.prepareStatement(stops_query);
             rs = preStatement.executeQuery();
         } catch (SQLException e) {

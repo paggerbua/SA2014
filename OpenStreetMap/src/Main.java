@@ -8,6 +8,6 @@ public class Main {
         DatabaseManager database = DatabaseManager.getInstance();
         StopsGUI stopsgui = new StopsGUI(database);
 
-        database.disconnect();
+        //database.disconnect();
     }
 }
